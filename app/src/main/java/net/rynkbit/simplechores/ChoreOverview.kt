@@ -10,7 +10,6 @@ import androidx.compose.material.DismissDirection
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.SwipeToDismiss
-import androidx.compose.material.ThresholdConfig
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Clear
@@ -34,48 +33,40 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.navigation.NavController
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.rynkbit.simplechores.database.Chore
-import net.rynkbit.simplechores.database.Database
 import net.rynkbit.simplechores.ui.theme.Green300
 import net.rynkbit.simplechores.ui.theme.Red300
 import java.util.Date
-import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChoreOverview(navController: NavController, database: Database) {
+fun ChoreOverview(mainViewModel: MainActivityViewModel) {
     val context = LocalContext.current
+    val overviewViewModel: ChoreOverviewViewModel = viewModel()
+
+    overviewViewModel.choreDao = mainViewModel.database.choreDao()
+    overviewViewModel.choresState = mainViewModel.database.choreDao().getAll().observeAsState()
 
     Scaffold(
-        floatingActionButton = { AddDateFab { navController.navigate(context.getString(R.string.nav_chore_add)) } },
+        floatingActionButton = { AddDateFab { mainViewModel.navController.navigate(context.getString(R.string.nav_chore_add)) } },
         floatingActionButtonPosition = FabPosition.End,
         topBar = {
             TopAppBar(title = { Text(text = "Chores") })
         }
     ) {
-        val chores = database.choreDao().getAll().observeAsState()
-
-        if (chores.value?.isEmpty() != false) {
+        if (!overviewViewModel.hasChores()) {
             Placeholder()
         } else {
             ChoreList(
                 it.calculateTopPadding(),
-                chores.value!!,
-                onChecked = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val chore = Chore(it.uid, it.description, it.interval, Date())
-                        database.choreDao().update(chore)
-                    }
-                },
-                onDelete = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        database.choreDao().delete(it)
-                    }
-                })
+                overviewViewModel.chores(),
+                onChecked = overviewViewModel::updateChore,
+                onDelete = overviewViewModel::deleteChore)
         }
     }
 }
