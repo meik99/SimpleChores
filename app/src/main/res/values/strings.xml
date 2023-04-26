@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SimpleChores</string>
+    <string name="nav_chore_overview">chore-overview</string>
+    <string name="nav_chore_add">chore-add</string>
+</resources>
