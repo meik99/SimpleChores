@@ -12,6 +12,9 @@ interface ChoreDao {
     @Query("SELECT * FROM Chore")
     fun getAll(): LiveData<List<Chore>>
 
+    @Query("SELECT * FROM CHORE WHERE uid = :choreId")
+    fun get(choreId: Int): LiveData<Chore>
+
     @Insert
     fun insert(chore: Chore)
 

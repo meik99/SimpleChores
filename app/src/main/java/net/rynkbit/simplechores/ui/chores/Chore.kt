@@ -1,4 +1,4 @@
-package net.rynkbit.simplechores
+package net.rynkbit.simplechores.ui.chores
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,73 +8,18 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import net.rynkbit.simplechores.database.Chore
-import net.rynkbit.simplechores.database.Database
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddChore(mainActivityViewModel: MainActivityViewModel) {
-    val description = remember {
-        mutableStateOf("")
-    }
-
-    val interval = remember {
-        mutableStateOf("1")
-    }
-
-    Scaffold(floatingActionButton = {
-        SaveDateFab(onClick = {
-            CoroutineScope(Dispatchers.IO).launch {
-                database?.apply {
-                    choreDao().insert(
-                        Chore(
-                            description = description.value,
-                            interval = interval.value.toInt(),
-                            lastCheck = null
-                        )
-                    )
-                }
-
-                CoroutineScope(Dispatchers.Main).launch {
-                    navController.popBackStack()
-                }
-            }
-
-        })
-    },
-        floatingActionButtonPosition = FabPosition.End,
-        topBar = {
-            TopAppBar(title = {
-                Text(text = "Add Chore")
-            })
-        }) {
-        ChoreDetails(
-            it.calculateTopPadding(),
-            description,
-            interval
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

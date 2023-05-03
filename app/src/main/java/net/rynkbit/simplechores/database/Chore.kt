@@ -19,6 +19,10 @@ data class Chore(
             return true
         }
 
+        if (interval == 0) {
+            return false
+        }
+
         val calendar = GregorianCalendar()
 
         calendar.set(Calendar.HOUR, 23)

@@ -1,5 +1,6 @@
-package net.rynkbit.simplechores
+package net.rynkbit.simplechores.ui.chores
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,11 +34,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import net.rynkbit.simplechores.MainActivityViewModel
+import net.rynkbit.simplechores.R
 import net.rynkbit.simplechores.database.Chore
 import net.rynkbit.simplechores.ui.theme.Green300
 import net.rynkbit.simplechores.ui.theme.Red300
@@ -53,7 +52,9 @@ fun ChoreOverview(mainViewModel: MainActivityViewModel) {
     overviewViewModel.choresState = mainViewModel.database.choreDao().getAll().observeAsState()
 
     Scaffold(
-        floatingActionButton = { AddDateFab { mainViewModel.navController.navigate(context.getString(R.string.nav_chore_add)) } },
+        floatingActionButton = { AddDateFab { mainViewModel.navController.navigate(context.getString(
+            R.string.nav_chore_add
+        )) } },
         floatingActionButtonPosition = FabPosition.End,
         topBar = {
             TopAppBar(title = { Text(text = "Chores") })
@@ -66,7 +67,8 @@ fun ChoreOverview(mainViewModel: MainActivityViewModel) {
                 it.calculateTopPadding(),
                 overviewViewModel.chores(),
                 onChecked = overviewViewModel::updateChore,
-                onDelete = overviewViewModel::deleteChore)
+                onDelete = overviewViewModel::deleteChore,
+                onClick = {chore -> mainViewModel.navController.navigate("chore-edit/${chore.uid}") })
         }
     }
 }
@@ -78,7 +80,8 @@ private fun ChoreList(
     paddingTop: Dp = Dp(8f),
     chores: List<Chore> = generateChores(),
     onChecked: (chore: Chore) -> Unit = {},
-    onDelete: (chore: Chore) -> Unit = {}
+    onDelete: (chore: Chore) -> Unit = {},
+    onClick: (chore: Chore) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -88,7 +91,10 @@ private fun ChoreList(
         for (chore in chores) {
             key(chore.uid) {
                 if (chore.isDue()) {
-                    ChoreCard(chore, onChecked = { onChecked(chore) }, onDelete = { onDelete(chore) })
+                    ChoreCard(chore,
+                        onChecked = { onChecked(chore) },
+                        onDelete = { onDelete(chore) },
+                        onClick = { onClick(chore) })
                 }
             }
         }
@@ -101,7 +107,8 @@ private fun ChoreList(
 fun ChoreCard(
     chore: Chore = Chore(description = "Test chore", interval = 1, lastCheck = Date()),
     onChecked: () -> Unit = {},
-    onDelete: () -> Unit = {}
+    onDelete: () -> Unit = {},
+    onClick: () -> Unit = {}
 ) {
     val dismissState = rememberDismissState()
 
@@ -127,8 +134,11 @@ fun ChoreCard(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Dp(2f)),
-            shape = CardDefaults.outlinedShape
+                .padding(Dp(2f))
+                .clickable {
+                   onClick()
+                },
+            shape = CardDefaults.outlinedShape,
         ) {
             Text(
                 modifier = Modifier

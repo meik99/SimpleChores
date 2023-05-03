@@ -1,4 +1,4 @@
-package net.rynkbit.simplechores
+package net.rynkbit.simplechores.ui.chores
 
 import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
