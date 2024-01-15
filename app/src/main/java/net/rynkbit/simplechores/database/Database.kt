@@ -1,16 +1,15 @@
 package net.rynkbit.simplechores.database
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.Migration
 
 @Database(
     entities = [
         Chore::class
     ],
-    version = 2
+    version = 2,
+    exportSchema = false
 )
 @TypeConverters(value = [
     DateConverter::class

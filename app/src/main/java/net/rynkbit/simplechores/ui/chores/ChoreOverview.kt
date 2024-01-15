@@ -13,21 +13,26 @@ import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,9 +40,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import net.rynkbit.simplechores.MainActivityViewModel
 import net.rynkbit.simplechores.R
 import net.rynkbit.simplechores.database.Chore
+import net.rynkbit.simplechores.ui.navigation.Drawer
 import net.rynkbit.simplechores.ui.theme.Green300
 import net.rynkbit.simplechores.ui.theme.Red300
 import java.util.Date
@@ -47,28 +54,54 @@ import java.util.Date
 fun ChoreOverview(mainViewModel: MainActivityViewModel) {
     val context = LocalContext.current
     val overviewViewModel: ChoreOverviewViewModel = viewModel()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
     overviewViewModel.choreDao = mainViewModel.database.choreDao()
     overviewViewModel.choresState = mainViewModel.database.choreDao().getAll().observeAsState()
 
-    Scaffold(
-        floatingActionButton = { AddDateFab { mainViewModel.navController.navigate(context.getString(
-            R.string.nav_chore_add
-        )) } },
-        floatingActionButtonPosition = FabPosition.End,
-        topBar = {
-            TopAppBar(title = { Text(text = "Chores") })
-        }
-    ) {
-        if (!overviewViewModel.hasChores()) {
-            Placeholder()
-        } else {
-            ChoreList(
-                it.calculateTopPadding(),
-                overviewViewModel.chores(),
-                onChecked = overviewViewModel::updateChore,
-                onDelete = overviewViewModel::deleteChore,
-                onClick = {chore -> mainViewModel.navController.navigate("chore-edit/${chore.uid}") })
+    Drawer(drawerState) {
+        Scaffold(
+            floatingActionButton = {
+                AddDateFab {
+                    mainViewModel.navController.navigate(
+                        context.getString(
+                            R.string.nav_chore_add
+                        )
+                    )
+                }
+            },
+            floatingActionButtonPosition = FabPosition.End,
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = "Chores") },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            if (drawerState.isOpen) {
+                                scope.launch { drawerState.close() }
+                            } else {
+                                scope.launch { drawerState.open() }
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Menu,
+                                contentDescription = "Drawer Menu"
+                            )
+                        }
+                    }
+                )
+            }
+        ) {
+            if (!overviewViewModel.hasChores()) {
+                Placeholder()
+            } else {
+                ChoreList(
+                    it.calculateTopPadding(),
+                    overviewViewModel.chores(),
+                    onChecked = overviewViewModel::updateChore,
+                    onDelete = overviewViewModel::deleteChore,
+                    onClick = { chore -> mainViewModel.navController.navigate("chore-edit/${chore.uid}") })
+            }
         }
     }
 }
@@ -136,7 +169,7 @@ fun ChoreCard(
                 .fillMaxWidth()
                 .padding(Dp(2f))
                 .clickable {
-                   onClick()
+                    onClick()
                 },
             shape = CardDefaults.outlinedShape,
         ) {

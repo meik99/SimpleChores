@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val viewModel: MainActivityViewModel = viewModel()
 
+
                 viewModel.database = database
                 viewModel.navController = navController
 
@@ -52,7 +53,8 @@ class MainActivity : ComponentActivity() {
                         composable(getString(R.string.nav_chore_add)) {
                             AddChore(viewModel)
                         }
-                        composable("chore-edit/{chore-id}",
+                        composable(
+                            "chore-edit/{chore-id}",
                             listOf(navArgument("chore-id") { type = NavType.IntType })
                         ) {
                             EditChore(viewModel, it.arguments?.getInt("chore-id"))
