@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import net.rynkbit.simplechores.MainActivityViewModel
 import net.rynkbit.simplechores.R
@@ -51,7 +52,7 @@ import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChoreOverview(mainViewModel: MainActivityViewModel) {
+fun ChoreOverview(mainViewModel: MainActivityViewModel, navController: NavHostController) {
     val context = LocalContext.current
     val overviewViewModel: ChoreOverviewViewModel = viewModel()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -60,7 +61,7 @@ fun ChoreOverview(mainViewModel: MainActivityViewModel) {
     overviewViewModel.choreDao = mainViewModel.database.choreDao()
     overviewViewModel.choresState = mainViewModel.database.choreDao().getAll().observeAsState()
 
-    Drawer(drawerState) {
+    Drawer(drawerState, navController) {
         Scaffold(
             floatingActionButton = {
                 AddDateFab {

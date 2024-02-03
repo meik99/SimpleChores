@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(navController = navController, startDestination = "chore-overview") {
                         composable(getString(R.string.nav_chore_overview)) {
-                            ChoreOverview(viewModel)
+                            ChoreOverview(viewModel, navController)
                         }
                         composable(getString(R.string.nav_chore_add)) {
                             AddChore(viewModel)
